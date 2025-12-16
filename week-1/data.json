@@ -1,0 +1,51 @@
+[
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "email": " Alice.JOHNSON@GMAIL.com ",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "email": "bob.smith@yahoo.com",
+      "active": false
+    },
+    {
+      "id": 3,
+      "name": "Charlie Brown",
+      "email": "charlie.brown@outlook.com ",
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Alice Johnson Duplicate",
+      "email": "alice.johnson@gmail.com",
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Eve Adams",
+      "email": "EVE.ADAMS@Company.COM",
+      "active": false
+    },
+    {
+      "id": 6,
+      "name": "Frank Miller",
+      "email": " frank.miller@gmail.com",
+      "active": true
+    },
+    {
+      "id": 7,
+      "name": "Grace Hopper",
+      "email": "grace.hopper@company.com ",
+      "active": true
+    },
+    {
+      "id": 8,
+      "name": "Bob Smith Duplicate",
+      "email": "BOB.SMITH@yahoo.com ",
+      "active": false
+    }
+  ]
+  
