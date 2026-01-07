@@ -39,7 +39,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Post('login') // users/login
+  @Post('login')
   login(@Body(ValidationPipe) body: LoginUserDto) {
     return this.usersService.login(body);
   }
@@ -51,7 +51,7 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
-  @Get(':id') // users/2/2
+  @Get(':id')
   findOne(@Param('id', ValidationPipe) id: string) {
     return this.usersService.findOne(+id);
   }
