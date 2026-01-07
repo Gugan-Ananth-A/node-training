@@ -12,12 +12,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { S3Service } from './s3.service';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -108,6 +111,16 @@ export class UsersService {
     Object.assign(user, updateUserDto);
 
     return await this.userRepository.save(user);
+  }
+
+  async uploadToS3(file: Express.Multer.File) {
+    await this.s3Service.client.send(
+      new PutObjectCommand({
+        Bucket: 'gugan-node-training',
+        Key: file.originalname,
+        Body: file.buffer,
+      }),
+    );
   }
 
   async remove(id: number) {

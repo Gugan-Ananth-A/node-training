@@ -11,6 +11,11 @@ import {
   Request,
   UnauthorizedException,
   ForbiddenException,
+  UseInterceptors,
+  UploadedFile,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,6 +24,8 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import type { Request as Req } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('users')
 export class UsersController {
@@ -38,7 +45,7 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(ThrottlerGuard, AuthGuard)
   findAll() {
     return this.usersService.findAll();
   }
@@ -47,6 +54,29 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id', ValidationPipe) id: string) {
     return this.usersService.findOne(+id);
+  }
+
+  @Throttle({
+    default: {
+      limit: 10,
+      ttl: 60000,
+    },
+  })
+  @Post('upload')
+  @UseGuards(ThrottlerGuard, AuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10000000 }),
+          new FileTypeValidator({ fileType: 'image/*' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.usersService.uploadToS3(file);
   }
 
   @Patch(':id')
