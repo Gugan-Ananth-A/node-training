@@ -7,6 +7,9 @@ import { LoggerMiddleware } from './logger.middleware';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { dataSourceOptions } from 'db/data-source';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheController } from './cache/cache.controller';
+import { CacheService } from './cache/cache.service';
 
 @Module({
   imports: [
@@ -21,6 +24,10 @@ import { dataSourceOptions } from 'db/data-source';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    CacheModule.register({
+      max: 100,
+      ttl: 0,
+    }),
     ThrottlerModule.forRoot([
       {
         name: 'default',
@@ -30,13 +37,16 @@ import { dataSourceOptions } from 'db/data-source';
     ]),
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
+    CacheModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    CacheService,
   ],
+  controllers: [CacheController],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

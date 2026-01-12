@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -14,14 +15,24 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { S3Service } from './s3.service';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly jwtService: JwtService,
     private readonly s3Service: S3Service,
   ) {}
+
+  async setCacheKey(key: string, value: string): Promise<void> {
+    await this.cacheManager.set(key, value);
+  }
+
+  async getCacheKey(key: string): Promise<string | undefined> {
+    return await this.cacheManager.get(key);
+  }
 
   async create(createUserDto: CreateUserDto) {
     const alreadyPresent = await this.userRepository.findOne({
