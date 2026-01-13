@@ -1,3 +1,5 @@
 week-2/jwt-login/.env
 week-2/jwt-login/node_modules
 week-2/jwt-login/dist
+express-week-2/node_modules
+express-week-2/dist
