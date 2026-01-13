@@ -12,6 +12,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { CacheController } from './cache/cache.controller';
 import { CacheService } from './cache/cache.service';
 import { CacheModule as CacheModuleNest } from './cache/cache.module';
+import { BullModule } from '@nestjs/bullmq';
+import { VideoModule } from './video/video.module';
 
 @Module({
   imports: [
@@ -26,6 +28,16 @@ import { CacheModule as CacheModuleNest } from './cache/cache.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+      defaultJobOptions: {
+        attempts: 3,
+      },
+      prefix: 'bullmq',
+    }),
     CacheModule.register({
       store: redisStore,
       isGlobal: true,
@@ -35,17 +47,19 @@ import { CacheModule as CacheModuleNest } from './cache/cache.module';
         host: 'localhost',
         port: 6379,
       },
+      prefix: 'cache',
     }),
     ThrottlerModule.forRoot([
       {
         name: 'default',
         ttl: 60000,
-        limit: 3,
+        limit: 20,
       },
     ]),
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
     CacheModuleNest,
+    VideoModule,
   ],
   providers: [
     {
