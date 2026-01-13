@@ -5,11 +5,13 @@ import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { LoggerMiddleware } from './logger.middleware';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { dataSourceOptions } from 'db/data-source';
-import { CacheModule } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 import { CacheController } from './cache/cache.controller';
 import { CacheService } from './cache/cache.service';
+import { CacheModule as CacheModuleNest } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -25,8 +27,14 @@ import { CacheService } from './cache/cache.service';
       }),
     }),
     CacheModule.register({
-      max: 100,
-      ttl: 0,
+      store: redisStore,
+      isGlobal: true,
+      max: 1000,
+      ttl: 60000,
+      socket: {
+        host: 'localhost',
+        port: 6379,
+      },
     }),
     ThrottlerModule.forRoot([
       {
@@ -37,12 +45,16 @@ import { CacheService } from './cache/cache.service';
     ]),
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
-    CacheModule,
+    CacheModuleNest,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
     },
     CacheService,
   ],
