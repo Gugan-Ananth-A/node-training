@@ -26,7 +26,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Request as Req } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('users')
 export class UsersController {
@@ -47,12 +47,15 @@ export class UsersController {
 
   @Get()
   @UseGuards(ThrottlerGuard, AuthGuard)
+  @UseInterceptors(CacheInterceptor)
   findAll() {
     return this.usersService.findAll();
   }
 
   @UseGuards(AuthGuard)
   @Get(':id')
+  @CacheTTL(60000)
+  @CacheKey('user')
   findOne(@Param('id', ValidationPipe) id: string) {
     return this.usersService.findOne(+id);
   }
